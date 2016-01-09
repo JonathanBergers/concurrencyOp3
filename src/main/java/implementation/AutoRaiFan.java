@@ -7,12 +7,18 @@ import interfaces.AutoRaiFanState;
  */
 public abstract class AutoRaiFan extends Thread{
 
+
+    private static int idCounter = 0;
+    protected final int id;
+
     protected final AutoRai autoRai;
     public AutoRaiFanState autoRaiFanState;
 
 
     protected AutoRaiFan(AutoRai autoRai) {
         this.autoRai = autoRai;
+        idCounter++;
+        id = idCounter;
     }
 
 

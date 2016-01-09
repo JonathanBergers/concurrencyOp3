@@ -11,6 +11,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AccessController extends Thread{
 
 
+    private int buyersInLine = 0;
+
+
     private  int visitorsInAutoRai = 0;
     public  int buyersVisited = 0;
     private final AutoRai autoRai;
@@ -34,17 +37,16 @@ public class AccessController extends Thread{
     public void join(AutoRaiFan fan) throws InterruptedException {
 
         lock.lock();
-        fan.onJoin();
         try{
             if(fan instanceof Visitor){
 
-                System.out.println("Visitor wants to join");
-                System.out.println(fan.toString());
-                while(buyerInside){
+                System.out.println(fan.toString() + " wants to join");
+                while(!userMayEnter()){
+                    System.out.println(fan.toString() +"must wait ");
                     visitorAllowed.await();
                 }
+                System.out.println(fan.toString() +" may enter");
                 autoRai.enter(fan);
-                fan.onEnter();
                 visitorsInside = true;
                 visitorsInAutoRai ++;
 
@@ -54,12 +56,15 @@ public class AccessController extends Thread{
 
             if(fan instanceof Buyer){
 
-                System.out.println("Buyer wants to join");
+                buyersInLine ++;
+                System.out.println(fan.toString() + "wants to join");
                 while(visitorsInside){
+                    System.out.println(fan.toString() +"must wait ");
                     buyerAllowed.await();
                 }
+                System.out.println(fan.toString() +" may enter");
                 autoRai.enter(fan);
-                fan.onEnter();
+                buyersInLine --;
                 buyerInside = true;
                 buyersVisited++;
                 return;
@@ -73,6 +78,24 @@ public class AccessController extends Thread{
 
 
     }
+
+
+    private boolean userMayEnter(){
+
+
+
+        if(buyerInside){
+            return false;
+        }
+        // buyer waiting, & allowed to go in first
+        if(buyersInLine>0 && buyersVisited % 5 == 0){
+            return false;
+        }
+
+        return true;
+
+    }
+
 
     public void onLeave(AutoRaiFan fan) throws InterruptedException {
 
@@ -95,7 +118,7 @@ public class AccessController extends Thread{
 
             if(fan instanceof Buyer){
                 buyerInside = false;
-                if(buyersVisited % 5 == 0){
+                if(buyersVisited % 5 != 0){
                     buyerAllowed.signal();
 
                 }else{
@@ -104,7 +127,6 @@ public class AccessController extends Thread{
 
             }
         }finally {
-            fan.onLeave();
             lock.unlock();
         }
 

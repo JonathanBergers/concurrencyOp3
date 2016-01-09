@@ -8,12 +8,9 @@ import interfaces.AutoRaiFanState;
 public class Buyer extends AutoRaiFan{
 
 
-
-
     protected Buyer(AutoRai autoRai) {
         super(autoRai);
     }
-
     @Override
     protected void onJoin() {
 
@@ -59,8 +56,11 @@ public class Buyer extends AutoRaiFan{
 
         while (true){
             try {
+                onJoin();
                 autoRai.accessController.join(this);
+                onEnter();
                 autoRai.accessController.onLeave(this);
+                onLeave();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -72,6 +72,6 @@ public class Buyer extends AutoRaiFan{
 
     @Override
     public String toString() {
-        return "Buyer";
+        return "Buyer: "+ id + "      ";
     }
 }

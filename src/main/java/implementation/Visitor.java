@@ -57,8 +57,11 @@ public class Visitor  extends AutoRaiFan{
 
         while (true){
             try {
+                onJoin();
                 autoRai.accessController.join(this);
+                onEnter();
                 autoRai.accessController.onLeave(this);
+                onLeave();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -70,6 +73,6 @@ public class Visitor  extends AutoRaiFan{
 
     @Override
     public String toString() {
-        return "Visitor";
+        return "Visitor: "+ id + "      ";
     }
 }
