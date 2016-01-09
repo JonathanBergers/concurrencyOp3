@@ -1,26 +1,21 @@
 package implementation;
 
 import java.util.ArrayList;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by falco on 9-1-16.
  */
 public class AccessController {
 
-    private Queue<Buyer> buyersLine = new LinkedBlockingQueue<Buyer>();
-    private Queue<Visitor> visitorsLine = new LinkedBlockingQueue<Visitor>();
-    private Object autoRaiLock = new Object();
+    private ArrayList<Buyer> buyersLine = new ArrayList<Buyer>();
+    private ArrayList<Visitor> visitorsLine = new ArrayList<Visitor>();
 
 
     //max 4
-    private int buyersWhomWentInsideCount = 0;
+    private int buyersInsideCombo = 0;
     private ArrayList<Buyer> buyersInside = new ArrayList<Buyer>();
 
-    private static final int MAXVISITORSINSIDE = 10;
+    private final int maxVisitorsInside = 10;
     //max 10
     private ArrayList<Visitor> visitorsInside = new ArrayList<Visitor>();
 
