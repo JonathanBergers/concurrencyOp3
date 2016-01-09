@@ -1,6 +1,5 @@
 package implementation;
 
-import interfaces.Controller;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -9,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by jonathan on 9-1-16.
  */
-public class AccessController{
+public class AccessController extends Thread{
 
 
     private  int visitorsInAutoRai = 0;
@@ -95,6 +94,7 @@ public class AccessController{
             }
 
             if(fan instanceof Buyer){
+                buyerInside = false;
                 if(buyersVisited % 5 == 0){
                     buyerAllowed.signal();
 
