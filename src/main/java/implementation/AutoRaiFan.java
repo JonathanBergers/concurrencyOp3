@@ -15,22 +15,24 @@ public abstract class AutoRaiFan extends Thread{
         this.autoRai = autoRai;
     }
 
+
+
     /**called to join the line at autorai
      *
      */
-    protected abstract void signUp();
+    protected abstract void onJoin();
 
     /** called when fan gets out of autorai
      *
      */
-    protected abstract void signOut();
+    protected abstract void onLeave();
 
 
     /**called after te user enters the autorai
      *
      *
      */
-    protected abstract void enjoyAutoRai();
+    protected abstract void onEnter();
 
 
 

@@ -1,117 +1,118 @@
 package implementation;
 
-import java.util.ArrayList;
+import interfaces.Controller;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by falco on 9-1-16.
+ * Created by jonathan on 9-1-16.
  */
-public class AccessController {
-
-    private ArrayList<Buyer> buyersLine = new ArrayList<Buyer>();
-    private ArrayList<Visitor> visitorsLine = new ArrayList<Visitor>();
+public class AccessController{
 
 
-    //max 4
-    private int buyersInsideCombo = 0;
-    private ArrayList<Buyer> buyersInside = new ArrayList<Buyer>();
+    private  int visitorsInAutoRai = 0;
+    public  int buyersVisited = 0;
+    private final AutoRai autoRai;
+    private Lock lock;
+    public boolean visitorsInside, buyerInside;
+    public Condition visitorAllowed, buyerAllowed;
 
-    private final int maxVisitorsInside = 10;
-    //max 10
-    private ArrayList<Visitor> visitorsInside = new ArrayList<Visitor>();
 
-    public AccessController() {
+    public AccessController( AutoRai autoRai) {
+
+        this.autoRai = autoRai;
+
+        lock = new ReentrantLock();
+        visitorAllowed = lock.newCondition();
+        buyerAllowed = lock.newCondition();
+        visitorsInside = false;
+        buyerInside = false;
 
     }
 
-    /**
-     * A buyer must first sign up, before he/she can wait in line to go inside
-     * @param buyer the buyer whom wants to go inside
-     */
-    public synchronized void signUpBuyer(Buyer buyer){
+    public void join(AutoRaiFan fan) throws InterruptedException {
 
-        //checks if nobody is inside, or in line and if it is the buyers turn to go inside
-        if(isBuyerNextInLine() && buyersInside.isEmpty() && visitorsInside.isEmpty()){
-            giveAccessToBuyer(buyer);
-        } else {
-            buyersLine.add(buyer);
+        lock.lock();
+        fan.onJoin();
+        try{
+            if(fan instanceof Visitor){
+
+                System.out.println("Visitor wants to join");
+                System.out.println(fan.toString());
+                while(buyerInside){
+                    visitorAllowed.await();
+                }
+                autoRai.enter(fan);
+                fan.onEnter();
+                visitorsInside = true;
+                visitorsInAutoRai ++;
+
+                return;
+
+            }
+
+            if(fan instanceof Buyer){
+
+                System.out.println("Buyer wants to join");
+                while(visitorsInside){
+                    buyerAllowed.await();
+                }
+                autoRai.enter(fan);
+                fan.onEnter();
+                buyerInside = true;
+                buyersVisited++;
+                return;
+
+
+            }
+
+        }finally {
+            lock.unlock();
         }
+
+
     }
 
-    /**
-     * A visitor must first sign up, before he/she can wait in line to go inside
-     * @param visitor the visitor whom wants to go inside
-     */
-    public synchronized void signUpVisitor(Visitor visitor){
-        //checks if there is room inside, or in line and if it is the visitors turn to go inside
-        if(!isBuyerNextInLine() && visitorsInside.size()<10 && visitorsLine.isEmpty() ){
-            giveAccessToVisitor(visitor);
-        } else {
-            visitorsLine.add(visitor);
-        }
-    }
+    public void onLeave(AutoRaiFan fan) throws InterruptedException {
 
-    /**
-     * when an buyer bought a car and wants to drive it home, he first has to sign out, so others can go inside
-     * @param buyer the buyer whom wants to go home
-     */
-    public synchronized void signOutBuyer(Buyer buyer){
-        buyersInside.remove(buyer);
-        if(!buyersInside.isEmpty()){
-            //buyer was not inside, maybe an assert?
+
+        lock.lock();
+        try{
+            if(fan instanceof Visitor){
+                visitorsInAutoRai --;
+                if(visitorsInAutoRai == 0){
+                    visitorsInside = false;
+                    if(buyersVisited % 5 == 0){
+                        buyerAllowed.signal();
+
+                    }
+
+                }
             return;
-        }
-        if(isBuyerNextInLine()){
-            if(visitorsInside.isEmpty()){
-                giveAccessToBuyer(buyersLine.poll());
+
             }
-        } else {
-            while(visitorsInside.size() < MAXVISITORSINSIDE && !visitorsLine.isEmpty()){
-                giveAccessToVisitor(visitorsLine.poll());
+
+            if(fan instanceof Buyer){
+                if(buyersVisited % 5 == 0){
+                    buyerAllowed.signal();
+
+                }else{
+                    visitorAllowed.signalAll();
+                }
+
             }
+        }finally {
+            fan.onLeave();
+            lock.unlock();
         }
+
+
+
     }
 
-    /**
-     * when a visitor has seen enough and he want to go home, he/she must first sign out so others can go inside
-     * @param visitor
-     */
-    public synchronized void signOutVisitor(Visitor visitor){
-        visitorsInside.remove(visitor);
-        if(visitorsInside.size() == MAXVISITORSINSIDE){
-            //visitor was not inside, maybe an assert?
-            return;
-        }
-        if(!isBuyerNextInLine()){
-            giveAccessToVisitor(visitorsLine.poll());
-        } else if(visitorsInside.isEmpty()){
-            giveAccessToBuyer(buyersLine.poll());
-        }
-    }
 
-    private void giveAccessToBuyer(Buyer buyer){
-        //something like:
-        // buyer.giveAccess();
-        //TODO
-
-        buyersWhomWentInsideCount ++;
-    }
-
-    private void giveAccessToVisitor(Visitor visitor){
-        //something like:
-        // visitor.giveAccess();
-        //TODO
-    }
-
-    private boolean isBuyerNextInLine(){
-        if(buyersWhomWentInsideCount % 5 == 0){
-            if(visitorsLine.isEmpty() || buyersWhomWentInsideCount == 0){
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
 
 
 }

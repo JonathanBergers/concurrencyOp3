@@ -13,28 +13,63 @@ public class Visitor  extends AutoRaiFan{
     }
 
     @Override
-    protected void signUp() {
+    protected void onJoin() {
 
-        assert getAutoRaiFanState() == AutoRaiFanState.CRAVING_COOL_CARS;
-        autoRai.accessController.signUpVisitor(this);
+
         setAutoRaiFanState(AutoRaiFanState.IN_LINE);
+        System.out.println(toString() + "I am waiting to go inside autoRai");
+
+
     }
 
     @Override
-    protected void signOut() {
+    protected void onLeave() {
         // tell the controller that you left
-        autoRai.accessController.signOutVisitor(this);
-
-        // set state
         setAutoRaiFanState(AutoRaiFanState.CRAVING_COOL_CARS);
+        System.out.println(toString() + "I Left autoRai");
+        // set state
+
 
 
         // crave some sexy cars
     }
 
     @Override
-    protected void enjoyAutoRai() {
-        assert getAutoRaiFanState() == AutoRaiFanState.INSIDE_AUTORAI;
-        System.out.println("omg dez carz");
+    protected void onEnter() {
+
+
+
+        System.out.println(toString() + "Im inside now for cars");
+
+        try {
+            setAutoRaiFanState(AutoRaiFanState.INSIDE_AUTORAI);
+            System.out.println(toString() + "Looking for cars..");
+            sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    @Override
+    public void run() {
+
+        while (true){
+            try {
+                autoRai.accessController.join(this);
+                autoRai.accessController.onLeave(this);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+//            onJoin();
+        }
+
+
+    }
+
+    @Override
+    public String toString() {
+        return "Visitor";
     }
 }
