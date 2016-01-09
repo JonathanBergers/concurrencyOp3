@@ -1,6 +1,9 @@
 package implementation;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by falco on 9-1-16.
@@ -9,6 +12,8 @@ public class AccessController {
 
     private ArrayList<Buyer> buyersLine = new ArrayList<Buyer>();
     private ArrayList<Visitor> visitorsLine = new ArrayList<Visitor>();
+
+
 
 
     //max 4
@@ -23,15 +28,18 @@ public class AccessController {
 
     }
 
-    public synchronized void signUpBuyer(){
+
+
+    public synchronized void signUpBuyer(Buyer buyer){
+
 
     }
 
-    public synchronized void signUpVisitor(){
+    public synchronized void signUpVisitor(Visitor visitor){
 
     }
 
-    public synchronized void signOutBuyer(){
+    public synchronized void signOutBuyer(Buyer buyer){
 
     }
 
