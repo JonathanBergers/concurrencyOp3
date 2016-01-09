@@ -42,7 +42,6 @@ public class AccessController extends Thread{
 
                 System.out.println(fan.toString() + " wants to join");
                 while(!userMayEnter()){
-                    System.out.println(fan.toString() +"must wait ");
                     visitorAllowed.await();
                 }
                 System.out.println(fan.toString() +" may enter");
@@ -59,7 +58,6 @@ public class AccessController extends Thread{
                 buyersInLine ++;
                 System.out.println(fan.toString() + "wants to join");
                 while(visitorsInside){
-                    System.out.println(fan.toString() +"must wait ");
                     buyerAllowed.await();
                 }
                 System.out.println(fan.toString() +" may enter");
@@ -81,9 +79,6 @@ public class AccessController extends Thread{
 
 
     private boolean userMayEnter(){
-
-
-
         if(buyerInside){
             return false;
         }
@@ -97,11 +92,16 @@ public class AccessController extends Thread{
     }
 
 
+    /**Deze methode wordt aangeroepen wanneer een fan de autorai verlaat.
+     *
+     * @param fan
+     * @throws InterruptedException
+     */
     public void onLeave(AutoRaiFan fan) throws InterruptedException {
-
-
         lock.lock();
         try{
+
+            autoRai.leave(fan);
             if(fan instanceof Visitor){
                 visitorsInAutoRai --;
                 if(visitorsInAutoRai == 0){

@@ -11,7 +11,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class AutoRai {
 
 
-    private LinkedBlockingQueue<AutoRaiFan> fans = new LinkedBlockingQueue<AutoRaiFan>();
     public final AccessController accessController;
 
 
@@ -21,27 +20,16 @@ public class AutoRai {
 
 
     public void enter(AutoRaiFan fan){
-//        fan.onEnter();
-        fans.add(fan);
+        //fan is inside.
+        // do nothing, its a simulation.
+
     }
 
     public void leave(AutoRaiFan fan){
-//        fan.onLeave();
-        fans.remove(fan);
+
     }
 
 
-
-    public synchronized boolean fansInside(){
-        return fans.size() == 0;
-    }
-
-    public synchronized boolean buyerInside(){
-        if(fans.size() != 1){
-            return false;
-        }
-        return fans.peek() instanceof Buyer;
-    }
 
 
 

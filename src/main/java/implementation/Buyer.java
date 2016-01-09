@@ -36,8 +36,6 @@ public class Buyer extends AutoRaiFan{
     @Override
     protected void onEnter() {
 
-
-
         System.out.println(toString() + "Im inside now for cars");
 
         try {
