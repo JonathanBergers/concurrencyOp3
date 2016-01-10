@@ -16,16 +16,16 @@ public class Test {
 
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
 
-            new Visitor(a).start();
-            new Visitor(a).start();
+            //new Visitor(a).start();
+            //new Visitor(a).start();
             //new Buyer(a).start();
             //new Buyer(a).start();
         }
 
-        //new Visitor(a).start();
-        new Buyer(a).start();
+        new Visitor(a).start();
+        //new Buyer(a).start();
 
     }
 }

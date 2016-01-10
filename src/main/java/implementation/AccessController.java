@@ -21,6 +21,7 @@ public class AccessController extends Thread{
     private Lock lock;
     public boolean visitorsInside, buyerInside;
     public Condition visitorAllowed, buyerAllowed;
+    private static Visitor lastJoinedVisiter;
 
 
     public AccessController( AutoRai autoRai) {
@@ -43,15 +44,19 @@ public class AccessController extends Thread{
 
                 visitorsInLine ++;
                 System.out.println(fan.toString() + " wants to join");
-                while(!onlyVisitorMayEnter() || isAutoRaiFull()){
-
+                while(!onlyVisitorMayEnter() || isAutoRaiFull()) {
+                    if (!onlyVisitorMayEnter() || lastJoinedVisiter == null) {
+                        lastJoinedVisiter = (Visitor) fan;
+                    }
                     //tetsing purpose
-                    if(isAutoRaiFull()){
+                    if (isAutoRaiFull()) {
                         System.out.println(fan.toString() + "waits in line because autoRai is full");
                     }
-
-
                     visitorAllowed.await();
+                }
+                if(fan == lastJoinedVisiter){
+                    visitorsInAutoRai = 0;
+                    lastJoinedVisiter = null;
                 }
                 System.out.println(fan.toString() +" may enter");
                 autoRai.enter(fan);
@@ -77,8 +82,6 @@ public class AccessController extends Thread{
                     } else {
                         System.out.println(fan.toString() + "waits in line because only visitors may enter");
                     }
-
-
                     buyerAllowed.await();
                 }
                 System.out.println(fan.toString() +" may enter");
@@ -87,8 +90,6 @@ public class AccessController extends Thread{
                 buyerInside = true;
                 buyersVisited++;
                 return;
-
-
             }
 
         }finally {
@@ -141,7 +142,7 @@ public class AccessController extends Thread{
                     return false;
                 }
                 buyerInside = false;
-                if(buyersVisited % 4 != 0){
+                if(!onlyVisitorMayEnter()){
                     buyerAllowed.signal();
 
                 }else{
