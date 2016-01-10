@@ -57,8 +57,10 @@ public class Buyer extends AutoRaiFan{
                 autoRai.accessController.join(this);
                 onEnter();
                 lookAround();
+                buyCar();
                 while (!autoRai.accessController.onLeave(this)){
                     lookAround();
+                    buyCar();
                 }
                 onLeave();
             } catch (InterruptedException e) {
@@ -81,7 +83,6 @@ public class Buyer extends AutoRaiFan{
             if(autoRaiFanState.equals(AutoRaiFanState.INSIDE_AUTORAI)){
                 System.out.println(toString() + "Looking at cars to buy");
                 sleep(5000);
-                buyCar();
             } else {
                 System.out.println(toString() + "I ant to look at cars, but I am not inside the autoRai");
             }
