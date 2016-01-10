@@ -8,6 +8,8 @@ import interfaces.AutoRaiFanState;
  */
 public class Buyer extends AutoRaiFan{
 
+    private int receipt = 0;
+
     //TODO MOVE ALL METHODS TO AUTORAIFAN EXCEPT TOSTRING
     protected Buyer(AutoRai autoRai) {
         super(autoRai);
@@ -58,7 +60,10 @@ public class Buyer extends AutoRaiFan{
                 onJoin();
                 autoRai.accessController.join(this);
                 onEnter();
-                autoRai.accessController.onLeave(this);
+                buyCar();
+                while (!autoRai.accessController.onLeave(this)){
+                    buyCar();
+                }
                 onLeave();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -72,5 +77,14 @@ public class Buyer extends AutoRaiFan{
     @Override
     public String toString() {
         return "Buyer: "+ id + "      ";
+    }
+
+    protected void buyCar(){
+        receipt = (int) (Math.random()*20+1) * 200;
+        System.out.println(toString() + "just bought a car for "+receipt+" euro's");
+    }
+
+    public boolean didBoughtAExpensiveEnoughCar(){
+        return receipt>=2500;
     }
 }

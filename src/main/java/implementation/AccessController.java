@@ -117,7 +117,7 @@ public class AccessController extends Thread{
      * @param fan
      * @throws InterruptedException
      */
-    public void onLeave(AutoRaiFan fan) throws InterruptedException {
+    public boolean onLeave(AutoRaiFan fan) throws InterruptedException {
         lock.lock();
         try{
 
@@ -132,11 +132,16 @@ public class AccessController extends Thread{
                     }
 
                 }
-            return;
+                return true;
 
             }
 
             if(fan instanceof Buyer){
+                Buyer buyer = (Buyer) fan;
+                if(!buyer.didBoughtAExpensiveEnoughCar()){
+                    System.out.println(buyer.toString()+"Did not bougt a car for 2500 or more. He/she has to buy an new one");
+                    return false;
+                }
                 buyerInside = false;
                 if(buyersVisited % 5 != 0){
                     buyerAllowed.signal();
@@ -144,13 +149,14 @@ public class AccessController extends Thread{
                 }else{
                     visitorAllowed.signalAll();
                 }
+                return true;
 
             }
         }finally {
             lock.unlock();
         }
 
-
+        return true;
 
     }
 
