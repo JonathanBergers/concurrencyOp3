@@ -21,7 +21,7 @@ public class AccessController extends Thread{
     private Lock lock;
     public boolean visitorsInside, buyerInside;
     public Condition visitorAllowed, buyerAllowed;
-    private static Visitor lastJoinedVisiter;
+    private static Visitor lastJoinedVisitor;
 
 
     public AccessController( AutoRai autoRai) {
@@ -45,8 +45,8 @@ public class AccessController extends Thread{
                 visitorsInLine ++;
                 System.out.println(fan.toString() + " wants to join");
                 while(!onlyVisitorMayEnter() || isAutoRaiFull()) {
-                    if (!onlyVisitorMayEnter() || lastJoinedVisiter == null) {
-                        lastJoinedVisiter = (Visitor) fan;
+                    if (!onlyVisitorMayEnter() || lastJoinedVisitor == null) {
+                        lastJoinedVisitor = (Visitor) fan;
                     }
                     //tetsing purpose
                     if (isAutoRaiFull()) {
@@ -54,9 +54,9 @@ public class AccessController extends Thread{
                     }
                     visitorAllowed.await();
                 }
-                if(fan == lastJoinedVisiter){
+                if(fan == lastJoinedVisitor){
                     visitorsInAutoRai = 0;
-                    lastJoinedVisiter = null;
+                    lastJoinedVisitor = null;
                 }
                 System.out.println(fan.toString() +" may enter");
                 autoRai.enter(fan);
@@ -99,9 +99,9 @@ public class AccessController extends Thread{
 
     }
 
-
+    //when false, only buyers are aloud
     private boolean onlyVisitorMayEnter(){
-        // buyer waiting, & allowed to go in first
+
         return ((buyersVisited % 4 == 0 || buyersInLine == 0) && visitorsInLine != 0) ;
 
 
