@@ -115,6 +115,7 @@ public class AccessController extends Thread{
     /**Deze methode wordt aangeroepen wanneer een fan de autorai verlaat.
      *
      * @param fan
+     * @return if the fan can leave
      * @throws InterruptedException
      */
     public boolean onLeave(AutoRaiFan fan) throws InterruptedException {
