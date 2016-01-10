@@ -72,6 +72,8 @@ public class Visitor  extends AutoRaiFan{
                 lookAround();
                 autoRai.accessController.onLeave(this);
                 onLeave();
+                goHomeAnddoThings();
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

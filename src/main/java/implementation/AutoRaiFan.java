@@ -55,6 +55,16 @@ public abstract class AutoRaiFan extends Thread{
         return this.autoRaiFanState.equals(state);
     }
 
+    protected void goHomeAnddoThings(){
+        try {
+            setAutoRaiFanState(AutoRaiFanState.DOING_THINGS);
+            System.out.println(toString() + "I am going home to do things");
+            sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 }

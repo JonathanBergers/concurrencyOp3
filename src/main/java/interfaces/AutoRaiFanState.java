@@ -5,6 +5,6 @@ package interfaces;
  */
 public enum AutoRaiFanState {
 
-    CRAVING_COOL_CARS, IN_LINE, INSIDE_AUTORAI;
+    CRAVING_COOL_CARS, IN_LINE, INSIDE_AUTORAI, DOING_THINGS;
 
 }

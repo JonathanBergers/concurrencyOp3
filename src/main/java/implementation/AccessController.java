@@ -12,7 +12,7 @@ public class AccessController extends Thread{
 
     //TODO , max visitors
     public static final int MAXVISITORSINSIDEAUTORAI = 10;
-    private int buyersInLine = 0;
+    private int buyersInLine, visitorsInLine = 0;
 
 
     private  int visitorsInAutoRai = 0;
@@ -41,14 +41,13 @@ public class AccessController extends Thread{
         try{
             if(fan instanceof Visitor){
 
+                visitorsInLine ++;
                 System.out.println(fan.toString() + " wants to join");
-                while(!visitorMayEnter() || isAutoRaiFull()){
+                while(!onlyVisitorMayEnter() || isAutoRaiFull()){
 
                     //tetsing purpose
                     if(isAutoRaiFull()){
                         System.out.println(fan.toString() + "waits in line because autoRai is full");
-                    } else {
-                        System.out.println(fan.toString() + "waits in line because there is a buyer inside autoRai");
                     }
 
 
@@ -56,6 +55,7 @@ public class AccessController extends Thread{
                 }
                 System.out.println(fan.toString() +" may enter");
                 autoRai.enter(fan);
+                visitorsInLine --;
                 visitorsInside = true;
                 visitorsInAutoRai ++;
 
@@ -67,13 +67,15 @@ public class AccessController extends Thread{
 
                 buyersInLine ++;
                 System.out.println(fan.toString() + "wants to join");
-                while(visitorsInside || isAutoRaiFull()){
+                while((visitorsInside || isAutoRaiFull() || onlyVisitorMayEnter())){
 
                     //tetsing purpose
                     if(isAutoRaiFull()){
                         System.out.println(fan.toString() + "waits in line because autoRai is full");
-                    } else {
+                    } else if(visitorsInside) {
                         System.out.println(fan.toString() + "waits in line because there is a visitor inside autoRai");
+                    } else {
+                        System.out.println(fan.toString() + "waits in line because only visitors may enter");
                     }
 
 
@@ -97,13 +99,10 @@ public class AccessController extends Thread{
     }
 
 
-    private boolean visitorMayEnter(){
+    private boolean onlyVisitorMayEnter(){
         // buyer waiting, & allowed to go in first
-        if(buyersInLine>0 && buyersVisited % 5 == 0){
-            return false;
-        }
+        return (buyersVisited % 4 == 0 || buyersInLine == 0) && visitorsInLine != 0 ;
 
-        return true;
 
     }
 
@@ -125,19 +124,17 @@ public class AccessController extends Thread{
             autoRai.leave(fan);
             if(fan instanceof Visitor){
                 visitorsInAutoRai --;
-                if(visitorsInAutoRai == 0){
-                    visitorsInside = false;
-                    if(buyersVisited % 5 == 0){
+                if(!onlyVisitorMayEnter()){
+                    if(visitorsInAutoRai == 0){
+                        visitorsInside = false;
                         buyerAllowed.signal();
-
                     }
-
+                } else {
+                    visitorAllowed.signal();
                 }
                 return true;
 
-            }
-
-            if(fan instanceof Buyer){
+            } else if(fan instanceof Buyer){
                 Buyer buyer = (Buyer) fan;
                 if(!buyer.didBoughtAExpensiveEnoughCar()){
                     System.out.println(buyer.toString()+"Did not bougt a car for 25000 or more. He/she has to buy an new one");
@@ -148,7 +145,9 @@ public class AccessController extends Thread{
                     buyerAllowed.signal();
 
                 }else{
-                    visitorAllowed.signalAll();
+                    for(int i = 0; i<MAXVISITORSINSIDEAUTORAI; i++){
+                        visitorAllowed.signal();
+                    }
                 }
                 return true;
 
