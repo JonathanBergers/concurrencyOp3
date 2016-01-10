@@ -95,7 +95,7 @@ public class Buyer extends AutoRaiFan{
 
     protected void buyCar(){
         //receipt = 100;
-        receipt = (int) (Math.random()*100+1) * 5000;
+        receipt = (int) (Math.random()*100+1) * 500;
         System.out.println(toString() + "just bought a car for "+receipt+" euro's");
     }
 
