@@ -41,13 +41,9 @@ public class Buyer extends AutoRaiFan{
 
         System.out.println(toString() + "Im inside now for cars");
 
-        try {
+
             setAutoRaiFanState(AutoRaiFanState.INSIDE_AUTORAI);
-            System.out.println(toString() + "Looking for cars..");
-            sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
 
     }
 
@@ -60,9 +56,9 @@ public class Buyer extends AutoRaiFan{
                 onJoin();
                 autoRai.accessController.join(this);
                 onEnter();
-                buyCar();
+                lookAround();
                 while (!autoRai.accessController.onLeave(this)){
-                    buyCar();
+                    lookAround();
                 }
                 onLeave();
             } catch (InterruptedException e) {
@@ -79,12 +75,28 @@ public class Buyer extends AutoRaiFan{
         return "Buyer: "+ id + "      ";
     }
 
+    protected void lookAround(){
+
+        try {
+            if(autoRaiFanState.equals(AutoRaiFanState.INSIDE_AUTORAI)){
+                System.out.println(toString() + "Looking at cars to buy");
+                sleep(5000);
+                buyCar();
+            } else {
+                System.out.println(toString() + "I ant to look at cars, but I am not inside the autoRai");
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     protected void buyCar(){
-        receipt = (int) (Math.random()*20+1) * 200;
+        receipt = (int) (Math.random()*100+1) * 500;
         System.out.println(toString() + "just bought a car for "+receipt+" euro's");
     }
 
     public boolean didBoughtAExpensiveEnoughCar(){
-        return receipt>=2500;
+        return receipt>=25000;
     }
 }

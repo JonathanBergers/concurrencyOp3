@@ -40,15 +40,24 @@ public class Visitor  extends AutoRaiFan{
 
 
         System.out.println(toString() + "Im inside now for cars");
+        setAutoRaiFanState(AutoRaiFanState.INSIDE_AUTORAI);
+
+
+    }
+
+    protected void lookAround(){
 
         try {
-            setAutoRaiFanState(AutoRaiFanState.INSIDE_AUTORAI);
-            System.out.println(toString() + "Looking for cars..");
-            sleep(5000);
+            if(autoRaiFanState.equals(AutoRaiFanState.INSIDE_AUTORAI)){
+                System.out.println(toString() + "Looking at cars..");
+                sleep(5000);
+            } else {
+                System.out.println(toString() + "I ant to look at cars, but I am not inside the autoRai");
+            }
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -60,6 +69,7 @@ public class Visitor  extends AutoRaiFan{
                 onJoin();
                 autoRai.accessController.join(this);
                 onEnter();
+                lookAround();
                 autoRai.accessController.onLeave(this);
                 onLeave();
             } catch (InterruptedException e) {

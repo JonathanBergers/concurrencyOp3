@@ -140,7 +140,7 @@ public class AccessController extends Thread{
             if(fan instanceof Buyer){
                 Buyer buyer = (Buyer) fan;
                 if(!buyer.didBoughtAExpensiveEnoughCar()){
-                    System.out.println(buyer.toString()+"Did not bougt a car for 2500 or more. He/she has to buy an new one");
+                    System.out.println(buyer.toString()+"Did not bougt a car for 25000 or more. He/she has to buy an new one");
                     return false;
                 }
                 buyerInside = false;
