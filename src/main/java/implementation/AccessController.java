@@ -19,7 +19,7 @@ public class AccessController extends Thread{
     private  int buyersVisited = 0;
     private final AutoRai autoRai;
     private Lock lock;
-    public boolean visitorsInside, buyerInside;
+    public boolean buyerInside;
     public Condition visitorAllowed, buyerAllowed;
 
 
@@ -30,7 +30,6 @@ public class AccessController extends Thread{
         lock = new ReentrantLock();
         visitorAllowed = lock.newCondition();
         buyerAllowed = lock.newCondition();
-        visitorsInside = false;
         buyerInside = false;
 
     }
@@ -43,22 +42,21 @@ public class AccessController extends Thread{
 
                 visitorsInLine ++;
                 System.out.println(fan.toString() + " wants to join");
-                while(!onlyVisitorMayEnter() || isAutoRaiFull()){
-
-                    //tetsing purpose
-                    if(isAutoRaiFull()){
-                        System.out.println(fan.toString() + "waits in line because autoRai is full");
-                    }
-
-
+                while(whoIsNextInLine() != NextInLine.VISITOR){
                     visitorAllowed.await();
                 }
-                System.out.println(fan.toString() +" may enter");
-                autoRai.enter(fan);
-                visitorsInLine --;
-                visitorsInside = true;
-                visitorsInAutoRai ++;
+                while(!mayGoIn(NextInLine.VISITOR)){
+                    visitorAllowed.await();
+                }
 
+                assert whoIsNextInLine() == NextInLine.VISITOR;
+                assert mayGoIn(NextInLine.VISITOR);
+
+                System.out.println(fan.toString() + " may enter");
+                autoRai.enter(fan);
+
+                visitorsInLine --;
+                visitorsInAutoRai ++;
                 return;
 
             }
@@ -67,26 +65,23 @@ public class AccessController extends Thread{
 
                 buyersInLine ++;
                 System.out.println(fan.toString() + "wants to join");
-                while((visitorsInside || isAutoRaiFull() || onlyVisitorMayEnter())){
-
-                    //tetsing purpose
-                    if(isAutoRaiFull()){
-                        System.out.println(fan.toString() + "waits in line because autoRai is full");
-                    } else if(visitorsInside) {
-                        System.out.println(fan.toString() + "waits in line because there is a visitor inside autoRai");
-                    } else {
-                        System.out.println(fan.toString() + "waits in line because only visitors may enter");
-                    }
 
 
+                while(whoIsNextInLine() != NextInLine.BUYER){
+                    System.out.println(fan.toString() + " is not next in line and has to wait for his turn");
                     buyerAllowed.await();
                 }
-                System.out.println(fan.toString() +" may enter");
+
+
+                while(!mayGoIn(NextInLine.BUYER)){
+                    System.out.println(fan.toString() + "may not go in and has to wait");
+                    buyerAllowed.await();
+                }
+
+                System.out.println(fan.toString() + "may enter");
                 autoRai.enter(fan);
                 buyersInLine --;
                 buyerInside = true;
-                buyersVisited++;
-                return;
 
 
             }
@@ -99,16 +94,6 @@ public class AccessController extends Thread{
     }
 
 
-    private boolean onlyVisitorMayEnter(){
-        // buyer waiting, & allowed to go in first
-        return (buyersVisited % 4 == 0 || buyersInLine == 0) && visitorsInLine != 0 ;
-
-
-    }
-
-    private boolean isAutoRaiFull(){
-        return buyerInside || visitorsInAutoRai > MAXVISITORSINSIDEAUTORAI;
-    }
 
 
     /**Deze methode wordt aangeroepen wanneer een fan de autorai verlaat.
@@ -121,37 +106,33 @@ public class AccessController extends Thread{
         lock.lock();
         try{
 
-            autoRai.leave(fan);
             if(fan instanceof Visitor){
+
                 visitorsInAutoRai --;
-                if(!onlyVisitorMayEnter()){
-                    if(visitorsInAutoRai == 0){
-                        visitorsInside = false;
-                        buyerAllowed.signal();
-                    }
-                } else {
-                    visitorAllowed.signal();
-                }
-                return true;
-
-            } else if(fan instanceof Buyer){
-                Buyer buyer = (Buyer) fan;
-                if(!buyer.didBoughtAExpensiveEnoughCar()){
-                    System.out.println(buyer.toString()+"Did not bougt a car for 25000 or more. He/she has to buy an new one");
-                    return false;
-                }
-                buyerInside = false;
-                if(buyersVisited % 4 != 0){
-                    buyerAllowed.signal();
-
-                }else{
-                    for(int i = 0; i<MAXVISITORSINSIDEAUTORAI; i++){
-                        visitorAllowed.signal();
-                    }
-                }
-                return true;
 
             }
+            if(fan instanceof Buyer){
+                if(((Buyer) fan).didBoughtAExpensiveEnoughCar()){
+                    buyersVisited ++;
+                    buyerInside = false;
+                }else{
+                    return false;
+                }
+
+            }
+
+
+            NextInLine nextInLine = whoIsNextInLine();
+
+            switch (nextInLine){
+                case VISITOR: if(mayGoIn(nextInLine)){ visitorAllowed.signal(); }
+                    break;
+                case BUYER: if(mayGoIn(nextInLine)){  buyerAllowed.signal(); }
+                    break;
+                case ANYONE:
+                    break;
+            }
+
         }finally {
             lock.unlock();
         }
@@ -160,6 +141,82 @@ public class AccessController extends Thread{
 
     }
 
+
+    /**Checks if the person next inline may go in
+     *
+     * @param nextInLine
+     * @return
+     */
+    private boolean mayGoIn(NextInLine nextInLine){
+
+        if(nextInLine == NextInLine.VISITOR){
+
+            assert buyerInside == false;
+            // is the autoRai full?
+            if(visitorsInAutoRai >= MAXVISITORSINSIDEAUTORAI){
+                return false;
+            }else {
+                // the autoRai isnt full so the visitor may enter
+                return true;
+            }
+
+
+        }
+        if(nextInLine == NextInLine.BUYER){
+            // is the autoRai full? if so, return false, else return true
+            return !(buyerInside || visitorsInAutoRai >= MAXVISITORSINSIDEAUTORAI);
+
+
+        }
+
+        assert nextInLine == NextInLine.ANYONE;
+        return true;
+
+
+    }
+
+    private enum NextInLine{
+        VISITOR, BUYER, ANYONE;
+    }
+
+    /**Checks who is next in line
+     *
+     * @return
+     */
+    private NextInLine whoIsNextInLine(){
+
+        //any buyers waiting?
+        if(buyersInLine >0){
+            //are there visitors wanting to go in too?
+            if(visitorsInLine>0){
+                // didnt 4 buyers already enter?
+                if(buyersVisited %4 != 0){
+                    return NextInLine.BUYER;
+                    // buyer is next inline
+
+
+                }else {
+                    // already 4 buyers entered
+                    return NextInLine.VISITOR;
+                }
+            }else {
+                // no visitors are waiting
+                // so the buyer is next in line.
+                return NextInLine.BUYER;
+            }
+
+        }else if(visitorsInLine == 0){
+            //no one is in line, so anyone is next
+            return NextInLine.ANYONE;
+
+        }else{
+            // visitors are in line waiting, so they are nextt
+            return NextInLine.VISITOR;
+
+        }
+
+
+    }
 
 
 
