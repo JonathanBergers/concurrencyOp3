@@ -141,7 +141,7 @@ public class AccessController extends Thread{
                     return false;
                 }
                 buyerInside = false;
-                if(buyersVisited % 5 != 0){
+                if(buyersVisited % 4 != 0){
                     buyerAllowed.signal();
 
                 }else{
