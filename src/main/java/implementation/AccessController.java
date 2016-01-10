@@ -11,12 +11,12 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AccessController extends Thread{
 
     //TODO , max visitors
-
+    public static final int MAXVISITORSINSIDEAUTORAI = 10;
     private int buyersInLine = 0;
 
 
     private  int visitorsInAutoRai = 0;
-    public  int buyersVisited = 0;
+    private  int buyersVisited = 0;
     private final AutoRai autoRai;
     private Lock lock;
     public boolean visitorsInside, buyerInside;
@@ -42,7 +42,16 @@ public class AccessController extends Thread{
             if(fan instanceof Visitor){
 
                 System.out.println(fan.toString() + " wants to join");
-                while(!userMayEnter()){
+                while(!visitorMayEnter() || isAutoRaiFull()){
+
+                    //tetsing purpose
+                    if(isAutoRaiFull()){
+                        System.out.println(fan.toString() + "waits in line because autoRai is full");
+                    } else {
+                        System.out.println(fan.toString() + "waits in line because there is a buyer inside autoRai");
+                    }
+
+
                     visitorAllowed.await();
                 }
                 System.out.println(fan.toString() +" may enter");
@@ -58,7 +67,16 @@ public class AccessController extends Thread{
 
                 buyersInLine ++;
                 System.out.println(fan.toString() + "wants to join");
-                while(visitorsInside){
+                while(visitorsInside || isAutoRaiFull()){
+
+                    //tetsing purpose
+                    if(isAutoRaiFull()){
+                        System.out.println(fan.toString() + "waits in line because autoRai is full");
+                    } else {
+                        System.out.println(fan.toString() + "waits in line because there is a visitor inside autoRai");
+                    }
+
+
                     buyerAllowed.await();
                 }
                 System.out.println(fan.toString() +" may enter");
@@ -79,10 +97,7 @@ public class AccessController extends Thread{
     }
 
 
-    private boolean userMayEnter(){
-        if(buyerInside){
-            return false;
-        }
+    private boolean visitorMayEnter(){
         // buyer waiting, & allowed to go in first
         if(buyersInLine>0 && buyersVisited % 5 == 0){
             return false;
@@ -90,6 +105,10 @@ public class AccessController extends Thread{
 
         return true;
 
+    }
+
+    private boolean isAutoRaiFull(){
+        return buyerInside || visitorsInAutoRai > MAXVISITORSINSIDEAUTORAI;
     }
 
 
