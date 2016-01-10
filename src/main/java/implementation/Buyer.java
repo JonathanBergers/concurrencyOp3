@@ -75,7 +75,7 @@ public class Buyer extends AutoRaiFan{
 
     @Override
     public String toString() {
-        return "Buyer: "+ id + "      ";
+        return "Buyer: "+ id + "\t\t";
     }
 
     protected void lookAround(){

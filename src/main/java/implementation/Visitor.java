@@ -85,6 +85,6 @@ public class Visitor  extends AutoRaiFan{
 
     @Override
     public String toString() {
-        return "Visitor: "+ id + "      ";
+        return "Visitor: "+ id + "\t\t";
     }
 }

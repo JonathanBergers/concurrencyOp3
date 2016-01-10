@@ -67,7 +67,7 @@ public class AccessController extends Thread{
 
                 buyersInLine ++;
                 System.out.println(fan.toString() + "wants to join");
-                while((visitorsInside || isAutoRaiFull() || onlyVisitorMayEnter())){
+                while((visitorsInside || isAutoRaiFull() || (onlyVisitorMayEnter() && buyersVisited < 0 ))){
 
                     //tetsing purpose
                     if(isAutoRaiFull()){
@@ -101,7 +101,7 @@ public class AccessController extends Thread{
 
     private boolean onlyVisitorMayEnter(){
         // buyer waiting, & allowed to go in first
-        return (buyersVisited % 4 == 0 || buyersInLine == 0) && visitorsInLine != 0 ;
+        return ((buyersVisited % 4 == 0 || buyersInLine == 0) && visitorsInLine != 0) ;
 
 
     }
@@ -124,7 +124,7 @@ public class AccessController extends Thread{
             autoRai.leave(fan);
             if(fan instanceof Visitor){
                 visitorsInAutoRai --;
-                if(!onlyVisitorMayEnter()){
+                if(!onlyVisitorMayEnter() || (buyersVisited == 0 && buyersInLine != 0)){
                     if(visitorsInAutoRai == 0){
                         visitorsInside = false;
                         buyerAllowed.signal();
