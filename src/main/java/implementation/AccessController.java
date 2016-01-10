@@ -78,6 +78,9 @@ public class AccessController extends Thread{
                     buyerAllowed.await();
                 }
 
+                assert whoIsNextInLine() == NextInLine.BUYER;
+                assert mayGoIn(NextInLine.BUYER);
+
                 System.out.println(fan.toString() + "may enter");
                 autoRai.enter(fan);
                 buyersInLine --;
@@ -152,7 +155,10 @@ public class AccessController extends Thread{
 
         if(nextInLine == NextInLine.VISITOR){
 
-            assert buyerInside == false;
+            // buyer inside?
+            if(buyerInside){
+                return false;
+            }
             // is the autoRai full?
             if(visitorsInAutoRai >= MAXVISITORSINSIDEAUTORAI){
                 return false;
