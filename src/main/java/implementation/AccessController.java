@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AccessController extends Thread{
 
+    //TODO , max visitors
 
     private int buyersInLine = 0;
 

@@ -4,10 +4,11 @@ import interfaces.AutoRaiFanState;
 
 /**
  * Created by falco on 9-1-16.
+ *
  */
 public class Buyer extends AutoRaiFan{
 
-
+    //TODO MOVE ALL METHODS TO AUTORAIFAN EXCEPT TOSTRING
     protected Buyer(AutoRai autoRai) {
         super(autoRai);
     }
